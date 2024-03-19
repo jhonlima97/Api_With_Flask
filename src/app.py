@@ -1,8 +1,9 @@
 from flask import Flask, jsonify, request
 from flask_mysqldb import MySQL
-from config import config
+from config import DevelopmentConfig
 
 app = Flask(__name__)
+app.config.from_object(DevelopmentConfig)
 conexion = MySQL(app)
 
 @app.route('/v1/courses/', defaults={'id': None}, methods=['GET'])
@@ -131,6 +132,6 @@ def page_not_found(error):
 
 
 if __name__ == '__main__':
-    app.config.from_object(config['development'])
+    app.config.from_object(DevelopmentConfig)
     app.register_error_handler(404, page_not_found)
     app.run()
