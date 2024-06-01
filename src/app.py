@@ -14,12 +14,12 @@ def list_courses(id):
         if id is None:
             sql = "SELECT * FROM course"
         else:
-            sql = "SELECT * FROM course WHERE id = '{0}' ".format(id)
+            sql = "SELECT * FROM course WHERE code = '{0}' ".format(id)
         cursor.execute(sql)
         datos=cursor.fetchall()
         courses=[]
         for fila in datos:
-            course={'id': fila[0], 'name': fila[1], 'credits': fila[2]}
+            course={'code': fila[0], 'name': fila[1], 'credits': fila[2]}
             courses.append(course)
          # Si no se encontraron cursos, retorna "Codigo no existe"
         if not courses and id is not None:
@@ -34,7 +34,7 @@ def list_courses(id):
 def add_course():
     try:
         # Obtén el ID del curso desde el request
-        course_id = request.json['id']
+        course_id = request.json['code']
         course_name = request.json['name']
         course_credits  = request.json['credits']
 
@@ -56,13 +56,13 @@ def add_course():
         
         # Verifica que el cod sea único
         cursor = conexion.connection.cursor()
-        cursor.execute("SELECT id FROM course WHERE id = %s", (course_id,))
+        cursor.execute("SELECT code FROM course WHERE code = %s", (course_id,))
         existing_id = cursor.fetchone()
         if existing_id is not None:
             return jsonify({'message': "El codigo ya existe"}), 406
 
         # Si el ID es válido, inserta el curso en la base de datos
-        sql = """INSERT INTO course(id, name, credits) 
+        sql = """INSERT INTO course(code, name, credits) 
             VALUES ('{0}','{1}',{2})""".format(course_id, course_name, course_credits)
         cursor.execute(sql)
         conexion.connection.commit()
@@ -91,7 +91,7 @@ def edit_course(id):
         
         # Verifica que el curso exista
         cursor = conexion.connection.cursor()
-        cursor.execute("SELECT id FROM course WHERE id = %s", (id,))
+        cursor.execute("SELECT code FROM course WHERE code = %s", (id,))
         existing_id = cursor.fetchone()
         if existing_id is None:
             return jsonify({'message': "Codigo no existe"}), 404
@@ -99,7 +99,7 @@ def edit_course(id):
         # Si el curso existe, actualiza el curso en la base de datos
         cursor = conexion.connection.cursor()
         sql = """UPDATE course SET name = '{0}', credits = {1} 
-            WHERE id = '{2}'""".format(course_name, course_credits, id)
+            WHERE code = '{2}'""".format(course_name, course_credits, id)
         cursor.execute(sql)
         conexion.connection.commit()
         return jsonify({'message': "Course updated successfully"})    
@@ -111,7 +111,7 @@ def delete_course(id):
     try:
         cursor = conexion.connection.cursor()
         # Verifica si el curso existe
-        cursor.execute("SELECT id FROM course WHERE id = %s", (id,))
+        cursor.execute("SELECT code FROM course WHERE code = %s", (id,))
         existing_id = cursor.fetchone()
 
         # Si el curso no existe"
@@ -119,7 +119,7 @@ def delete_course(id):
             return jsonify({'message': "Codigo no existe"}), 404
 
         # Si el curso existe, elimínalo
-        sql = "DELETE FROM course WHERE id = '{0}'".format(id)
+        sql = "DELETE FROM course WHERE code = '{0}'".format(id)
         cursor.execute(sql)
         conexion.connection.commit()
         return jsonify({'message': "Course deleted successfully"})
